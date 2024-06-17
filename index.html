@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document Summary</title>
+  </head>
+
+  <body>
+    <div>
+      <form id="uploadForm">
+        <!-- file uploader -->
+        <input type="file" name="file" id="file" required />
+        <button type="submit" onclick="submitForm(event)">Submit PDF</button>
+      </form>
+    </div>
+    <p id="summary"></p>
+
+    <script>
+      async function submitForm(e) {
+        e.preventDefault(); // Prevent default form submission
+        console.log("Form submitted 1");
+        document.getElementById("summary").innerText = "Loading..."; // Clear previous summary
+        const fileInput = document.getElementById("file");
+        const file = fileInput.files[0];
+        console.log("Form submitted 2");
+
+        if (!file) {
+          alert("Please select a file before submitting.");
+          return;
+        }
+        console.log("Form submitted 3");
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        console.log("Form submitted 4");
+        document.getElementById("summary").innerText = "Loading...";
+
+        console.log("Form submitted 5");
+        try {
+          console.log("Sending request to server...");
+          const response = await fetch("http://127.0.0.1:8000/process/", {
+            method: "POST",
+            body: formData,
+          });
+
+          console.log("Response status:", response.status);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log("Response data:", data);
+          if (data.error) {
+            document.getElementById(
+              "summary"
+            ).innerText = `Error: ${data.error}`;
+          } else {
+            let summaries = data.summaries
+              .map(
+                (summary, index) =>
+                  `<p><strong>Summary ${index + 1}:</strong> ${summary}</p>`
+              )
+              .join("");
+            document.getElementById(
+              "summary"
+            ).innerHTML = `<p><strong>Filename:</strong> ${data.filename}</p>${summaries}`;
+          }
+        } catch (error) {
+          console.error("Fetch error:", error);
+          document.getElementById("summary").innerText =
+            "An error occurred while processing the PDF.";
+        }
+      }
+    </script>
+  </body>
+</html>

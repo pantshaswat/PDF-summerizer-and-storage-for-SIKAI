@@ -1,0 +1,10 @@
+
+google.generativeai
+langchain-google-genai
+langchain
+langchain_community
+jupyter
+fastapi
+uvicorn
+pypdf
+python-dotenv
